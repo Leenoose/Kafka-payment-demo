@@ -16,7 +16,7 @@ async def get_transactions() -> dict:
 @router.post("/init_db")
 async def init_db():
     create_table_query = f"""
-                        create table if not exists users (
+                        create table if not exists transactions (
                             transaction_id SERIAL PRIMARY KEY,
                             sender_id SERIAL NOT NULL,
                             recipient_id SERIAL NOT NULL,
