@@ -63,4 +63,7 @@ async def create_user(user: User):
 
 @router.post("/generate_jwt")
 async def generate_jwt():
+    # generate JWT and update database
+    # https://stackoverflow.com/questions/72975593/where-to-store-tokens-secrets-with-fastapi-python
+    # https://testdriven.io/blog/fastapi-jwt-auth/
     return
