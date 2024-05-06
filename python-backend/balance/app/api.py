@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.model.balance import Balance
+from .model.balance import Balance
 import sys
 import psycopg2
 from psycopg2 import Error

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.model.user import User
+from .model.user import User
 import sys
 import psycopg2
 from psycopg2 import Error

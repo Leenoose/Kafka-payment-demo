@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.model.transaction import Transaction
+from .model.transaction import Transaction
 import sys
 import psycopg2
 from psycopg2 import Error
