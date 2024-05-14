@@ -7,6 +7,14 @@ import jwt
 
 router = APIRouter()
 
+@router.onevent("startup")
+async def startup():
+    pass
+
+@router.onevent("shutdown")
+async def shutdown():
+    pass
+
 
 @router.get("/users")
 async def get_users() -> dict:
