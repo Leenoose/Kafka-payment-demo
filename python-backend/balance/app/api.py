@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 from app.model.balance import Balance
-from app.model.transaction_topic import Transaction_Topic
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 import sys
 import psycopg2
@@ -34,15 +33,16 @@ async def consume():
             print(value['sender_id'])
             print(value['recipient_id'])
             print(value['amount'])
-            #Use these values
 
     finally:
         await consumer.stop()
+
 
 @router.on_event("startup")
 async def startup():
     await aioproducer.start()
     loop.create_task(consume())
+
 
 @router.on_event("shutdown")
 async def shutdown():
@@ -53,6 +53,7 @@ async def shutdown():
 @router.get("/balance")
 async def get_balances() -> dict:
     return {"data": Balance}
+
 
 @router.post("/get_user_balance")
 async def get_user_balance(user_id):
@@ -96,33 +97,13 @@ async def create_new_user_balance(user_id):
 
 
 @router.post("/update_user_balance")
-async def update_user_balance(balance: Balance):
-    try:
-        connection = psycopg2.connect(
-            user=PSQL_USERNAME, password=PSQL_PASSWORD, host=PSQL_DATABASE_HOSTNAME, port="5432", database=PSQL_DATABASE_NAME)
-        cursor = connection.cursor()
-        query = f"select * from balances where balance_id = '{balance_id}';"
-        cursor.execute(query)
-        data = cursor.fetchall()
-        return data
-
-    except (Exception, Error) as error:
-        print(error)
-    finally:
-        if (connection):
-            cursor.close()
-            connection.close()
-            print("Conn closed successfully")
-
-
-@router.post("/update_user_balance")
-async def update_user_balance(balance: Balance):
+async def update_user_balance(sender_id: int, recipient_id: int, amount: float):
 
     try:
         connection = psycopg2.connect(
             user=PSQL_USERNAME, password=PSQL_PASSWORD, host=PSQL_DATABASE_HOSTNAME, port="5432", database=PSQL_DATABASE_NAME)
         cursor = connection.cursor()
-        query = f"update balances set balance = {balance.balance} where user_id='{balance.user_id}')"
+        query = f"update balances set balance = balance - {amount} where user_id='{sender_id}'; update balances set balance = balance + {amount} where user_id='{recipient_id}';"
 
         cursor.execute(query)
         connection.commit()
@@ -135,8 +116,6 @@ async def update_user_balance(balance: Balance):
             connection.close()
             print("Conn closed successfully")
 
-#Port this function to transactions service, run this when writing transaction to database.
-@router.post("/topictest")
-async def transaction_produce(msg: Transaction_Topic):
-    await aioproducer.send('transactions', json.dumps(msg.dict()).encode("ascii"))
-    return
+
+async def produce_transaction(msg: Balance):
+    await aioproducer.send('balances', json.dumps(msg.dict()).encode("ascii"))

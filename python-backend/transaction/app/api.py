@@ -1,42 +1,30 @@
 from fastapi import APIRouter
 from .model.transaction import Transaction
 import sys
+from aiokafka import AIOKafkaProducer
 import psycopg2
+import json
 from psycopg2 import Error
-import jwt
 
 router = APIRouter()
+
+KAKFA_HOSTNAME = os.environ.get('KAFKA_HOSTNAME', 'localhost')
+
+PSQL_DATABASE_HOSTNAME = os.environ.get('DB_HOSTNAME', 'localhost')
+PSQL_USERNAME = os.environ.get('DB_USER', 'postgres')
+PSQL_PASSWORD = os.environ.get('DB_PASSWORD', 'mypassword')
+PSQL_DATABASE_NAME = os.environ.get('DB_NAME', 'transactions')
+
+KAFKA_INSTANCE = KAKFA_HOSTNAME + ":9092"
+
+loop = asyncio.get_event_loop()
+
+aioproducer = AIOKafkaProducer(loop=loop, bootstrap_servers=KAFKA_INSTANCE)
 
 
 @router.get("/transactions")
 async def get_transactions() -> dict:
     return {"data": Transaction}
-
-
-@router.post("/init_db")
-async def init_db():
-    create_table_query = f"""
-                        create table if not exists transactions (
-                            transaction_id SERIAL PRIMARY KEY,
-                            sender_id INTEGER NOT NULL,
-                            recipient_id INTEGER NOT NULL,
-                            amount NUMERIC(7,5) NOT NULL
-                        );
-                        """
-    try:
-        connection = psycopg2.connect(
-            user="postgres", password="mypassword", host="localhost", port="5432", database="transactions")
-        cursor = connection.cursor()
-        connection.autocommit = True
-        cursor.execute(create_table_query)
-
-    except (Exception, Error) as error:
-        print(error)
-    finally:
-        if (connection):
-            cursor.close()
-            connection.close()
-            print("Conn closed successfully")
 
 
 @router.post("/create_transaction")
@@ -57,6 +45,7 @@ async def create_transaction(transaction: Transaction):
         if (connection):
             cursor.close()
             connection.close()
+            await produce_transaction(transaction)
             print("Conn closed successfully")
 
 
@@ -121,3 +110,7 @@ async def get_incoming_transactions(user_id):
             cursor.close()
             connection.close()
             print("Conn closed successfully")
+
+
+async def produce_transaction(msg: Transaction):
+    await aioproducer.send('transactions', json.dumps(msg.dict()).encode("ascii"))
