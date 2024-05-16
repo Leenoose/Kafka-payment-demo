@@ -30,10 +30,7 @@ async def consume():
     try:
         async for msg in consumer:
             value = json.loads(msg.value)
-            print(value['sender_id'])
-            print(value['recipient_id'])
-            print(value['amount'])
-
+            await update_user_balance(value['sender_id'], value['recipient_id'], value['amount'])
     finally:
         await consumer.stop()
 
