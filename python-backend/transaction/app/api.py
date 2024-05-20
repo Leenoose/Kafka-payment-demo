@@ -5,7 +5,7 @@ from aiokafka import AIOKafkaProducer
 import psycopg2
 import json
 from psycopg2 import Error
-
+import os
 router = APIRouter()
 
 KAKFA_HOSTNAME = os.environ.get('KAFKA_HOSTNAME', 'localhost')
