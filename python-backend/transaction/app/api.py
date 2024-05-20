@@ -34,7 +34,7 @@ async def create_transaction(transaction: Transaction):
 
     try:
         connection = psycopg2.connect(
-            user="postgres", password="mypassword", host="localhost", port="5432", database="transactions")
+            user=PSQL_USERNAME, password=PSQL_PASSWORD, host=PSQL_DATABASE_HOSTNAME, port="5432", database=PSQL_DATABASE_NAME)
         cursor = connection.cursor()
         query = f"insert into transactions (sender_id, recipient_id, amount) values ('{transaction.sender_id}', '{transaction.recipient_id}', '{transaction.amount}')"
 
@@ -56,7 +56,7 @@ async def get_transaction(transaction_id):
 
     try:
         connection = psycopg2.connect(
-            user="postgres", password="mypassword", host="localhost", port="5432", database="transactions")
+            user=PSQL_USERNAME, password=PSQL_PASSWORD, host=PSQL_DATABASE_HOSTNAME, port="5432", database=PSQL_DATABASE_NAME)
         cursor = connection.cursor()
         query = f"select * from transactions where transaction_id = '{transaction_id}';"
         cursor.execute(query)
@@ -77,7 +77,7 @@ async def get_outgoing_transactions(user_id):
 
     try:
         connection = psycopg2.connect(
-            user="postgres", password="mypassword", host="localhost", port="5432", database="transactions")
+            user=PSQL_USERNAME, password=PSQL_PASSWORD, host=PSQL_DATABASE_HOSTNAME, port="5432", database=PSQL_DATABASE_NAME)
         cursor = connection.cursor()
         query = f"select * from transactions where sender_id = '{user_id}';"
         cursor.execute(query)
@@ -98,7 +98,7 @@ async def get_incoming_transactions(user_id):
 
     try:
         connection = psycopg2.connect(
-            user="postgres", password="mypassword", host="localhost", port="5432", database="transactions")
+            user=PSQL_USERNAME, password=PSQL_PASSWORD, host=PSQL_DATABASE_HOSTNAME, port="5432", database=PSQL_DATABASE_NAME)
         cursor = connection.cursor()
         query = f"select * from transactions where recipient_id = '{user_id}';"
         cursor.execute(query)
