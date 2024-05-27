@@ -116,3 +116,4 @@ async def get_incoming_transactions(user_id):
 
 async def produce_transaction(msg: Transaction):
     await aioproducer.send('transactions', json.dumps(msg.dict()).encode("ascii"))
+    return json.dumps(msg.dict())
