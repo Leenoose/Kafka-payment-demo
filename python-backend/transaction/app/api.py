@@ -23,6 +23,14 @@ loop = asyncio.get_event_loop()
 
 aioproducer = AIOKafkaProducer(loop=loop, bootstrap_servers=KAFKA_INSTANCE)
 
+@router.on_event("startup")
+async def startup():
+    await aioproducer.start()
+
+@router.on_event("shutdown")
+async def shutdown():
+    await aioproducer.stop()
+
 
 @router.get("/transactions")
 async def get_transactions() -> dict:
