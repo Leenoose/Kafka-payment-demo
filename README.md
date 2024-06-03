@@ -116,9 +116,15 @@ This is an example of how to list things you need to use the software and how to
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Access the Swagger UI via localhost:8000 (or whichever port you are using for this project) and run the /producer/{topicname} POST request.
+Access the Swagger UI via localhost:8000 (or whichever port you are using for this project) and run the /create_transaction POST request. Ensure that you use only id's 1 and 2 for sender_id and recipient_id.
 
-After doing so, check your database. The message that was sent in the POST request should have a new entry in the database.
+After doing so, check the balance database using 
+```
+psql -c "select * from balances"
+```
+You should see that the balance service has updated its database even though there are no API calls from the transaction service.
+
+
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -132,13 +138,13 @@ To provision a Kafka cluster, install the operator AMQ Streams. After doing so, 
 
 2. Provision a PostgreSQL instance
 
-Add two databases via the Developer Catalog, and select PostgreSQL. Note that when doing so, it is important to have a PostgreSQL Connection Username, PostgreSQL Connection Password, and a PostgreSQL Database Name. These will be used in the environment variables. You can call them balance and transaction respectively.
+Add two databases via the Developer Catalog, and select PostgreSQL. Note that when doing so, it is important to have a PostgreSQL Connection Username, PostgreSQL Connection Password, and a PostgreSQL Database Name. These will be used in the environment variables. You can call them balance and transaction respectively. Ensure that you run the db-init queries after initializing the database.
 
 3. Cloning the project
 
 Add the project to your OpenShift console using the git repo url (https://github.com/Leenoose/Kafka-payment-demo.git). As the two services are in subdirectories of their own, expand the advanced Git options, and set the Context dir to /balance and /transaction respectively.
 
-Note that the build for both services will fail. This is because the environment variables are not being set yet, and the default values (localhost) are still being used, even though they are not applicable here. To remedy this, go to Builds, look for the name of the added services, and edit the build config. There should be a section to add environment variables. Update the values as follows
+Expand the build configuration option at the bottom of the page. You should see environment variables here. Fill these up with the values as follows.
 
 | Name | Value    
 | :---:   | :---: 
@@ -148,8 +154,16 @@ Note that the build for both services will fail. This is because the environment
 | DB_PASSWORD | PostgreSQL Connection password
 | DB_NAME | PostgreSQL Database Name
 
+
+
+Note that the build for both services will fail if you skip the above step.. This is because the environment variables are necessary to build the project. If you missed that step, go to Builds, look for the name of the added services, and edit the build config. There should be a section to add environment variables. Update the values accordingly. Rebuild the pod when you are done.
+
+
 For the HOSTNAME variables, refer to the hostname you have under Administrator > Networking > Services.
-Click into the individual services and copy the value under Service routing.
+Click into the individual services and copy the value under Service routing. It should look something like this
+```
+<service-name>.<project-name>.svc.cluster.local
+```
 
 <!-- LICENSE -->
 ## License
